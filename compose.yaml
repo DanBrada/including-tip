@@ -1,0 +1,28 @@
+﻿services:
+  includingtip:
+    image: includingtip
+    build:
+      context: .
+      dockerfile: IncludingTip/IncludingTip/Dockerfile
+    environment:
+      DB_HOST: postgres
+
+  includingtip.client:
+    image: includingtip.client
+    build:
+      context: .
+      dockerfile: IncludingTip/IncludingTip.Client/Dockerfile
+      
+  postgres:
+    image: postgres:alpine
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_PASSWORD: toor
+      
+
+volumes:
+  postgres_data:

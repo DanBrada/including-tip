@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IncludingTip", "IncludingTip\IncludingTip\IncludingTip.csproj", "{8F455D99-1991-4ACA-8AE9-FC27F3FB54C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IncludingTip.Client", "IncludingTip\IncludingTip.Client\IncludingTip.Client.csproj", "{590882B9-A75E-438D-B1FF-B261D2D64C00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CBBB3CD1-1E27-4D31-92AC-2902CF97FDDE}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F455D99-1991-4ACA-8AE9-FC27F3FB54C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F455D99-1991-4ACA-8AE9-FC27F3FB54C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F455D99-1991-4ACA-8AE9-FC27F3FB54C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F455D99-1991-4ACA-8AE9-FC27F3FB54C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{590882B9-A75E-438D-B1FF-B261D2D64C00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{590882B9-A75E-438D-B1FF-B261D2D64C00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{590882B9-A75E-438D-B1FF-B261D2D64C00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{590882B9-A75E-438D-B1FF-B261D2D64C00}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
