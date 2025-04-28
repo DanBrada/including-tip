@@ -1,15 +1,44 @@
 ﻿@inherits LayoutComponentBase
 <nav>
     <div class="navbar bg-base-200 shadow-sm">
-        <a class="btn btn-ghost text-xl">Including tip</a>
-        
+        <div class="flex-1">
+            <a href="/" class="text-xl">Including tip</a>
+        </div>
+        <div class="flex gap-2 items-center">
+            <a href="/country" class="hover:link">Země</a>
+            <input class="input input-bordered w-24 outline-none md:w-auto">
+            @if (LoggedIn)
+            {
+                <div class="flexitems-center gap-x-2">
+                    <span class="">Uživatel</span>
+                    <button class="btn">
+                    <i class="ti ti-logout"></i>
+                    </button>
+                </div>
+            }        
+        </div>
+
     </div>
 </nav>
-<div id="blazor-error-ui" data-nosnippet class="alert alert-error my-3 max-w-[99vw] mx-auto" role="alert">
+<div id="blazor-error-ui" data-nosnippet class="alert alert-error my-3 max-w-[99vw] mx-auto invisible" role="alert">
     An unhandled error has occurred. :(
     <a href="." class="reload">Reload</a>
     <span class="dismiss cursor-pointer" onclick="()=>document.querySelector('#blazor-error-ui').remove()">🗙</span>
 </div>
 
-@Body
+<div class="grid grid-cols-6">
+    <div class="col-start-2 col-end-6">
+        @Body
+    </div>
+</div>
 
+<footer class="footer sm:footer-horizontal bg-neutral text-neutral-content p-10 mt-5">
+    <nav>
+        <h6 class="footer-title">XD</h6>
+    </nav>
+</footer>
+
+@code{
+    public bool LoggedIn { get; set; } = true;
+    
+}

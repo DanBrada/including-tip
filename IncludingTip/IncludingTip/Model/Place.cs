@@ -9,4 +9,11 @@ public class Place
     public double Latitutde { get; set; }
     public Country? Country { get; set; } = null;
     public string CountryCode { get; set; }
+
+    public ICollection<Tip> Tips { get; set; } = new List<Tip>();
+
+    public double GetAverageTip()
+    {
+        return Tips.Average(t => t.Percent);
+    }
 }

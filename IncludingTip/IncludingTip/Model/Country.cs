@@ -12,5 +12,9 @@ public class Country
 
     public ICollection<Place> Places { get; set; } = new List<Place>();
 
+    public double GetAverageTip()
+    {
+        return Places.Average(p => p.GetAverageTip());
+    }
     
 }

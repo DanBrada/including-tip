@@ -1,0 +1,35 @@
+﻿<SfMaps>
+    <MapsLayers>
+        <MapsAnnotation X="100%" Y="100%">
+            <ContentTemplate>
+                <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+            </ContentTemplate>
+        </MapsAnnotation>
+        <MapsLayer UrlTemplate="https://tile.openstreetmap.org/level/tileX/tileY.png" TValue="string">
+            <MapsMarkerSettings>
+                <MapsMarker Visible="true" TValue="MarkerData" DataSource="Markers"></MapsMarker>
+            </MapsMarkerSettings>
+        </MapsLayer>
+    </MapsLayers>
+</SfMaps>
+
+@code {
+    [Parameter]
+    public double Latitude { get; set; }
+    [Parameter]
+    public double Longitude { get; set; }
+    [Parameter]
+    public string DisplayName { get; set; }
+
+
+    record MarkerData(double Latitude, double Longitude, string Name);
+
+    List<MarkerData> Markers = new();
+
+    protected override void OnInitialized()
+    {
+        Markers.Add(new(Latitude, Longitude, DisplayName));
+    }
+
+
+}

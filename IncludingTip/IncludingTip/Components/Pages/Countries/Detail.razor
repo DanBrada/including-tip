@@ -1,0 +1,76 @@
+﻿@page "/country/{code}"
+@using IncludingTip.Services
+@inject CountriesService CountryService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+<PageTitle>Detail země: @Country?.IsoCountry.ShortName</PageTitle>
+<h1 class="font-bold text-center text-4xl p-2">@Country?.IsoCountry.ShortName (🇨🇿: @CountryService.GetCzechCountry(Country.IsoCountry).Name)</h1>
+
+<div>
+    @if (Country?.DbCountry == null)
+    {
+        <div class="alert alert-info my-3">
+            <i class="ti ti-info-circle text-lg"></i>
+            <span>Země není v DB :(</span>
+        </div>
+    }
+    
+    @if (Country?.DbCountry != null)
+    {
+        <div class="grid grid-cols-3 gap-3">
+            <div class="col-span-3 stats-shadow">
+                <div class="stat">
+                    <div class="stat-value">132456</div>
+                </div>
+            </div>
+            <div class=" col-span-2 text-justify mx-auto">
+                <h2 class="font-bold text-center text-3xl">Spropitné v zemi</h2>
+                <div class="prose max-w-[75ch] text-justify">
+                    @Country.DbCountry.TipPolicy
+                </div>
+                <h2 class="font-bold text-center text-3xl">AI shrnutí zkušeností</h2>
+                <div class="prose max-w-[75ch] text-justify">
+                    AI neny zatim
+                </div>
+            </div>
+            <div>
+                @* <CountryOnAMap DisplayName="@Country.IsoCountry.ShortName" Latitude="@CountryLat" Longitude="@CountryLon" /> *@
+                Mapka, kde se země nachází + List podniků v zemi
+                @CountryLat, @CountryLon
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Code { get; set; }
+    public double CountryLat;
+    public double CountryLon;
+
+    public CountriesService.CountryContext? Country;
+
+
+    public async Task LoadCountryAsync()
+    {
+        Country = CountryService.QueryCountry(Code);
+
+        if (Country is null)
+        {
+            Navigation.NavigateTo("/Error");
+            return;
+        }
+
+        var (lat, lon) = await CountryService.GetExpandedCountryData(Country.IsoCountry);
+
+        CountryLat = lat;
+        CountryLon = lon;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadCountryAsync();
+    }
+
+}

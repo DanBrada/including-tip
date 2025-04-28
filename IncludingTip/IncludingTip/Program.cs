@@ -1,5 +1,6 @@
 using IncludingTip.Components;
 using IncludingTip.Model;
+using IncludingTip.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,11 +10,17 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddDbContext<TipApplicationContext>(options =>
+builder.Services.AddDbContextFactory<TipApplicationContext>(options =>
     options
         .UseNpgsql(TipApplicationContext.ConfigureConnectionFromEnv())
         .UseSnakeCaseNamingConvention()
 );
+
+builder.Services.AddHttpClient();
+
+builder.Services.AddSingleton<GenAIService>();
+builder.Services.AddSingleton<NominatimService>();
+builder.Services.AddSingleton<CountriesService>();
 
 var app = builder.Build();
 

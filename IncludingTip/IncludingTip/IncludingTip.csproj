@@ -8,12 +8,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Bia.Countries" Version="3.0.0" />
         <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+        <PackageReference Include="ISO3166CZ" Version="1.0.5" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="OpenAI" Version="2.2.0-beta.4" />
         <ProjectReference Include="..\IncludingTip.Client\IncludingTip.Client.csproj"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0"/>
     </ItemGroup>

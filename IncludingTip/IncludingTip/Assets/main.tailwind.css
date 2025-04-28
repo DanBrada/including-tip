@@ -2,3 +2,9 @@
 @plugin "daisyui" {
     themes: light --default;
 }
+
+@theme {
+    --font-display: "Open Sans", "Noto Color Emoji",sans-serif;
+    --font-sans: var(--font-display);
+    --font-serif: "Vollkorn", "Noto Color Emoji", serif;
+}
