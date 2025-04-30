@@ -7,7 +7,11 @@ using CzCountry = ISO3166CZ.Country;
 
 namespace IncludingTip.Services;
 
-public class CountriesService(IDbContextFactory<TipApplicationContext> DatabaseFactory, NominatimService Nominatim)
+public class CountriesService(
+    IDbContextFactory<TipApplicationContext> DatabaseFactory,
+    NominatimService Nominatim,
+    CachingService cache,
+    GenAIService genAI)
 {
     public record CountryContext(IsoCountry IsoCountry, DbCountry? DbCountry);
 
@@ -19,29 +23,56 @@ public class CountriesService(IDbContextFactory<TipApplicationContext> DatabaseF
         return code.ToUpper();
     }
 
-    public CountryContext? QueryCountry(string isoCode)
+    public async Task<CountryContext?> QueryCountry(string isoCode)
     {
         var normalizedCode = NormalizeCountryCode(isoCode);
 
+        var cacheEntry = cache.Get<CountryContext>($"countries:{normalizedCode}");
+        if (cacheEntry is not null)
+        {
+            Console.WriteLine("Pulled country context from cache");
+            return cacheEntry;
+        }
+
         var isoCountry = Countries.GetCountryByAlpha2(normalizedCode);
 
-        if (isoCountry == null)
+        if (isoCountry is null)
             return null;
 
-        var databaseContext = DatabaseFactory.CreateDbContext();
-        return new CountryContext(isoCountry, databaseContext.Countries.Find(normalizedCode));
+        var databaseContext = await DatabaseFactory.CreateDbContextAsync();
+        var dbCountry = await databaseContext.Countries
+            .Include(c=>c.Places)
+            .ThenInclude(p=>p.Tips)
+            .FirstOrDefaultAsync(c=>c.IsoCountryCode == normalizedCode);
+
+        var country = new CountryContext(isoCountry, dbCountry);
+        cache.Put($"countries:{normalizedCode}", country);
+        return country;
     }
 
     public Task<(double, double)> GetExpandedCountryData(IsoCountry country) =>
         Nominatim.GetCountryLatLong(country);
 
+    public async Task<string> GetRecentAISummary(DbCountry country) =>
+        await genAI.GetRecentCountryTippingSummary(country);
+
     public CzCountry GetCzechCountry(IsoCountry country)
     {
+        var cacheEntry = cache.Get<CzCountry>($"countries:{country.Alpha2}:czech");
+        if (cacheEntry is not null)
+            return cacheEntry;
         var candidates = CzCountry.GetCountries().Where(c => c.Numeric == country.Numeric).ToArray();
 
         if (candidates.Length != 1)
             throw new Exception("Invalid number of candidates in query");
 
-        return candidates[0];
+        var czc = candidates[0];
+
+        if (czc is not null)
+        {
+            cache.Put($"countries:{country.Alpha2}:czech", czc);
+        }
+
+        return czc;
     }
 }

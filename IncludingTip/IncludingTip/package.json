@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tailwindcss -i Assets/main.tailwind.css -o wwwroot/main.css"
+    "build": "tailwindcss -i Assets/main.tailwind.css -o wwwroot/main.css",
+    "build:watch": "tailwindcss -i Assets/main.tailwind.css -o wwwroot/main.css --watch"
   },
   "keywords": [],
   "author": "",
@@ -11,6 +12,7 @@
   "description": "",
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.4",
+    "@tailwindcss/typography": "^0.5.16",
     "daisyui": "^5.0.28",
     "tailwindcss": "^4.1.4"
   }

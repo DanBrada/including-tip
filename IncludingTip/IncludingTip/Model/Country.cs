@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace IncludingTip.Model;
 
@@ -14,7 +15,14 @@ public class Country
 
     public double GetAverageTip()
     {
-        return Places.Average(p => p.GetAverageTip());
+        try
+        {
+            return Places.Average(p => p.GetAverageTip());
+        }
+        catch
+        {
+            return 0.0;
+        }
     }
     
 }

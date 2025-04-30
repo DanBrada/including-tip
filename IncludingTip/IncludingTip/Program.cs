@@ -1,6 +1,7 @@
 using IncludingTip.Components;
 using IncludingTip.Model;
 using IncludingTip.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,10 +18,25 @@ builder.Services.AddDbContextFactory<TipApplicationContext>(options =>
 );
 
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 
+
+builder.Services.AddSingleton<RedisService>();
+builder.Services.AddSingleton<CachingService>();
+// builder.Services.AddSingleton<SessionService>();
 builder.Services.AddSingleton<GenAIService>();
 builder.Services.AddSingleton<NominatimService>();
 builder.Services.AddSingleton<CountriesService>();
+builder.Services.AddSingleton<UserService>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(opt =>
+    {
+        opt.ExpireTimeSpan = TimeSpan.FromDays(14);
+        opt.SlidingExpiration = false;
+        opt.SessionStore = new SessionService(new RedisService());
+    });
+
 
 var app = builder.Build();
 
@@ -40,6 +56,12 @@ app.UseHttpsRedirection();
 
 
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseCookiePolicy(new CookiePolicyOptions{
+    MinimumSameSitePolicy = SameSiteMode.Strict
+    
+});
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

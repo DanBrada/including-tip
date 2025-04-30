@@ -1,10 +1,50 @@
 ﻿@page "/country"
+@using System.Text
+@using Bia.Countries.Iso3166
 
-Seznam zemí
+<h1 class="font-bold text-center text-4xl py-3">Seznam zemí</h1>
+<p class="text-justify max-w-[75ch] mx-auto pb-3">
+    V seznamu nejsou zahrnuty země, které podle standardu <span class="italic">ISO-3166</span> nemají přidělenou žádnou zkratku, nebo již zanikly.
+</p>
 
-<ul>
-    <li><a href="/country/cz">Jáá</a></li>
-    <li><a href="/country/de">Jáá</a></li>
-    <li><a href="/country/nl">Jáá</a></li>
-    <li><a href="/country/us">Jáá</a></li>
-</ul>
+<div class="grid grid-cols-4">
+    @foreach (Country country in Countries.CountryList.Where(c => c.Alpha2 != CountryCode.None && !GetCountryDisplayName(c).Contains("Former")))
+    {
+        <div><a href="/country/@country.Alpha2">@GetIndicatorSequence(country.Alpha2.ToString()) @GetCountryDisplayName(country)</a></div>
+    }
+</div>
+
+
+@code {
+
+    /// <summary>
+    /// Basically queries emoji for a given country :D
+    /// </summary>
+    /// <param name="of"></param>
+    /// <returns></returns>
+    private string GetIndicatorSequence(string of)
+    {
+        StringBuilder sb = new();
+
+        foreach(var ch in of.ToUpper())
+        {
+            // Calculate the regional indicator
+            sb.Append('\ud83c');
+            sb.Append((char) ('\udde6' + (ch - (int) 'A')));
+        }
+
+        return sb.ToString();
+    }
+
+    private string GetCountryDisplayName(Country country)
+    {
+        if (country.ActiveDirectoryName?.Length > 0)
+            return country.ActiveDirectoryName;
+        else if (country.ShortName?.Length > 0)
+            return country.ShortName;
+        else if (country.FullName?.Length > 0)
+            return country.FullName;
+
+        return country.Alpha2.ToString();
+    }
+}

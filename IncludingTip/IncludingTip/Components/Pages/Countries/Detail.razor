@@ -1,37 +1,77 @@
 ﻿@page "/country/{code}"
+@using System.Security.Principal
 @using IncludingTip.Services
+@using Markdig
 @inject CountriesService CountryService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 @attribute [StreamRendering]
-<PageTitle>Detail země: @Country?.IsoCountry.ShortName</PageTitle>
-<h1 class="font-bold text-center text-4xl p-2">@Country?.IsoCountry.ShortName (🇨🇿: @CountryService.GetCzechCountry(Country.IsoCountry).Name)</h1>
+<PageTitle>Detail země:
+    @if (Country is not null)
+    {
+        @Country.IsoCountry.ShortName
+    }
+</PageTitle>
+@if (Country is not null)
+{
+    <h1 class="font-bold text-center text-4xl p-2">@Country?.IsoCountry.ShortName (🇨🇿: @CountryService.GetCzechCountry(Country.IsoCountry).Name)</h1>
+}
 
 <div>
-    @if (Country?.DbCountry == null)
+    @if (Country?.DbCountry is null && !loading)
     {
         <div class="alert alert-info my-3">
             <i class="ti ti-info-circle text-lg"></i>
-            <span>Země není v DB :(</span>
+            <span>O spropitném v této zemi zatím nemáme žádné informace. <NavLink href="/" class="link">Přidat</NavLink></span>
         </div>
     }
-    
-    @if (Country?.DbCountry != null)
+
+    @foreach(var Error in Errors)
+    {
+        <div class="alert alert-error my-3">
+            <i class="ti ti-alert-octagon text-lg"></i>
+            <span>@Error</span>
+        </div>
+    }
+
+    @if (Country?.DbCountry is null && loading)
+    {
+        <div class="w-full flex jusify-center">
+            <span class="mx-auto loading loading-spinner loading-xl"></span>
+        </div>
+    }
+
+    @if (Country?.DbCountry is not null)
     {
         <div class="grid grid-cols-3 gap-3">
             <div class="col-span-3 stats-shadow">
                 <div class="stat">
-                    <div class="stat-value">132456</div>
+                    <div class="stat-title">Průměrné spropitné</div>
+                    <div class="stat-value">@Country.DbCountry.GetAverageTip()%</div>
+                    <div class="stat-desc">Průměr průměrů</div>
                 </div>
             </div>
             <div class=" col-span-2 text-justify mx-auto">
-                <h2 class="font-bold text-center text-3xl">Spropitné v zemi</h2>
+                <h2 class="font-bold text-center text-3xl py-3">Spropitné v zemi</h2>
                 <div class="prose max-w-[75ch] text-justify">
                     @Country.DbCountry.TipPolicy
                 </div>
-                <h2 class="font-bold text-center text-3xl">AI shrnutí zkušeností</h2>
-                <div class="prose max-w-[75ch] text-justify">
-                    AI neny zatim
+                <h2 class="font-bold text-center text-3xl py-3">Shrnutí zkušeností</h2>
+                <div class="prose max-w-[75ch] text-justify mb-0">
+                    @if (loading)
+                    {
+                        <div class="w-full">
+                            <span class="mx-auto loading loading-spinner loading-xl"></span>
+                        </div>
+                    }
+                    else if(AISummary is not null)
+                    {
+                        @((MarkupString)Markdown.ToHtml(AISummary))
+                        <span class="italic !text-center text-xs w-full">
+                            <i class="ti ti-sparkles text-xs"></i>
+                            &nbsp;Toto shrnutí bylo vytvořeno s použitím generativní umělé inteligence.
+                        </span>
+                    }
                 </div>
             </div>
             <div>
@@ -45,15 +85,18 @@
 
 @code {
     [Parameter] public string Code { get; set; }
-    public double CountryLat;
-    public double CountryLon;
+    private bool loading = true;
+    private double CountryLat;
+    private double CountryLon;
+    private List<string> Errors { get; set; } = new();
+    private string? AISummary = null;
 
-    public CountriesService.CountryContext? Country;
+    private CountriesService.CountryContext? Country;
 
 
-    public async Task LoadCountryAsync()
+    private async Task LoadCountryAsync()
     {
-        Country = CountryService.QueryCountry(Code);
+        Country = await CountryService.QueryCountry(Code);
 
         if (Country is null)
         {
@@ -61,16 +104,48 @@
             return;
         }
 
-        var (lat, lon) = await CountryService.GetExpandedCountryData(Country.IsoCountry);
+        if(Country.DbCountry is not null)
+        {
+            try
+            {
+                var (lat, lon) = await CountryService.GetExpandedCountryData(Country.IsoCountry);
 
-        CountryLat = lat;
-        CountryLon = lon;
+                CountryLat = lat;
+                CountryLon = lon;
+            }
+            catch (Exception e)
+            {
+                Errors.Add(e.Message);
+            }
+        }
+
+        loading = false;
+    }
+
+    private async Task LoadCountryAISummary()
+    {
+        if (Country?.DbCountry is null) return;
+        loading = true;
+        AISummary = await CountryService.GetRecentAISummary(Country.DbCountry);
+        loading = false;
     }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await LoadCountryAsync();
+        StateHasChanged();
+        if (Country is not null)
+            try
+            {
+                await LoadCountryAISummary();
+            }
+            catch (Exception e)
+            {
+                Errors.Add(e.Message);
+                AISummary = "Vyskytla se chyba :(";
+                loading = false;
+            }
     }
 
 }

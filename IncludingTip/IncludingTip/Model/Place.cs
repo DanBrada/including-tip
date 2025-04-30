@@ -14,6 +14,13 @@ public class Place
 
     public double GetAverageTip()
     {
-        return Tips.Average(t => t.Percent);
+        try
+        {
+            return Tips.Average(t => t.Percent);
+        }
+        catch
+        {
+            return 0.0;
+        }
     }
 }

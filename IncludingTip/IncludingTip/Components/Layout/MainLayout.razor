@@ -1,18 +1,21 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider auth
 <nav>
     <div class="navbar bg-base-200 shadow-sm">
         <div class="flex-1">
-            <a href="/" class="text-xl">Including tip</a>
+            <NavLink href="/" class="text-xl">Including tip</NavLink>
         </div>
         <div class="flex gap-2 items-center">
-            <a href="/country" class="hover:link">Země</a>
+            <NavLink href="/country" class="hover:link">Země</NavLink>
             <input class="input input-bordered w-24 outline-none md:w-auto">
             @if (LoggedIn)
             {
-                <div class="flexitems-center gap-x-2">
-                    <span class="">Uživatel</span>
+                <div class="flex items-center gap-x-2">
+                    <span class="px-3">@User</span>
                     <button class="btn">
-                    <i class="ti ti-logout"></i>
+                        <i class="ti ti-logout"></i>
                     </button>
                 </div>
             }        
@@ -26,13 +29,13 @@
     <span class="dismiss cursor-pointer" onclick="()=>document.querySelector('#blazor-error-ui').remove()">🗙</span>
 </div>
 
-<div class="grid grid-cols-6">
+<div class="grid grid-cols-6 h-full">
     <div class="col-start-2 col-end-6">
         @Body
     </div>
 </div>
 
-<footer class="footer sm:footer-horizontal bg-neutral text-neutral-content p-10 mt-5">
+<footer class="footer sm:footer-horizontal bg-neutral text-neutral-content p-10 mt-auto">
     <nav>
         <h6 class="footer-title">XD</h6>
     </nav>
@@ -40,5 +43,15 @@
 
 @code{
     public bool LoggedIn { get; set; } = true;
-    
+    public string User { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await auth.GetAuthenticationStateAsync();
+
+        LoggedIn = state.User.Identity?.IsAuthenticated ?? false;
+        if(LoggedIn)
+            User = state.User.Claims.First(c => c.Type == ClaimTypes.Name)?.Value ?? "";
+    }
+
 }
