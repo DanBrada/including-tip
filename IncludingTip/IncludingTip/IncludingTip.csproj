@@ -10,6 +10,7 @@
     <ItemGroup>
         <PackageReference Include="Bia.Countries" Version="3.0.0" />
         <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+        <PackageReference Include="Google.Apis.MapsPlaces.v1" Version="1.69.0.3776" />
         <PackageReference Include="ISO3166CZ" Version="1.0.5" />
         <PackageReference Include="Markdig" Version="0.41.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">

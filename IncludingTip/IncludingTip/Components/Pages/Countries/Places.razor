@@ -1,0 +1,32 @@
+﻿@page "/country/{code}/places"
+@using IncludingTip.Model
+@using IncludingTip.Services
+@inject PlaceService places;
+
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/country">Země</a></li>
+        <li><a href="/country/@Code">@Code</a></li>
+    </ul>
+</div>
+
+
+<h1 class="font-bold text-4xl text-center">@Code Podniky</h1>
+
+@if (PlaceList is not null)
+{
+    @foreach (var place in PlaceList)
+    {
+        <a href="/place/@place.Id">@place.Name</a>
+    }   
+}
+
+@code {
+    [Parameter] public string Code { get; set; }
+    public List<Place>? PlaceList = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        PlaceList = await places.GetPlacesByCountry(Code);
+    }
+}

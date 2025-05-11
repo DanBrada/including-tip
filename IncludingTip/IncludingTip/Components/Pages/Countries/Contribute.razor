@@ -52,11 +52,13 @@ else
     async Task SaveDescription()
     {
         if (country is null)
-            return;
+            await CountriesService.CreateNewCountry(Code, mdVal);
+        else
+        {
+            country.TipPolicy = mdVal;
+            await CountriesService.SaveCountry(country);
+        }
         
-        country.TipPolicy = mdVal;
-        
-        await CountriesService.SaveCountry(country);
         Navigation.NavigateTo($"/country/{Code}");
     }
 

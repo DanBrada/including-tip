@@ -1,0 +1,109 @@
+﻿@page "/place/{id:int}"
+@using IncludingTip.Model
+@using IncludingTip.Services
+@using Markdig
+@inject NavigationManager Navigation
+@inject PlaceService Places
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+<PageTitle>Detail Podniku</PageTitle>
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/country">Země</a></li>
+        <li><a href="/country/@Place?.CountryCode">@Place?.CountryCode</a></li>
+        <li><a href="/country/@Place?.CountryCode/places">Podniky</a></li>
+    </ul>
+</div>
+
+<h1 class="font-bold text-4xl text-center">Detail Podniku @Place?.Name</h1>
+@if (Loading)
+{
+    <Loader/>
+}
+else if(Place is not null)
+{
+    <div class="grid grid-cols-3">
+        <div class="col-span-3 stats stats-shadow">
+            <div class="stat">
+                <div class="stat-title">Průměrné dýško</div>
+                <div class="stat-value">@Place.GetAverageTip()%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Celkem zkušeností</div>
+                <div class="stat-value">@Place.Tips.Count</div>
+                <div class="stat-actions">
+                    <button class="btn btn-primary p-2">
+                        <i class="ti ti-plus"></i>&nbsp;Přidat zkušenost 
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-2">
+            <div>
+                <h2 class="font-bold text-center text-3xl py-2">Popisek místa</h2>
+                <div class="prose">
+                    @((MarkupString)Markdown.ToHtml(Place?.Content ?? ""))
+                </div>
+            </div>
+            <div>
+                <h2 class="font-bold text-center text-3xl py-2">Shrnutí zkušeností</h2>
+                <div class="prose">
+                    @((MarkupString)Markdown.ToHtml(AiSummary ?? ""))
+                    <AiDisclaimer />
+                </div>
+            </div>
+        </div>
+
+        <div>
+            @if (Place is not null)
+            {
+                <CountryOnAMap Latitude="Place.Latitutde" Longitude="Place.Longitude" DisplayName="@Place.Name"/>
+            }
+        </div>
+        
+        <div class="col-span-3 flex flex-col py-3">
+            <h2 class="font-bold text-3xl text-center py-2">Zkušenosti</h2>
+            <div class="grid grid-cols-3 gap-3">
+                @foreach (var experience in Place?.Tips??[])
+                {
+                    <div class="card card-border bg-base-100">
+                        <h3 class="card-title">@experience.Title</h3>
+                        <div class="prose card-body">
+                            @((MarkupString) Markdown.ToHtml(experience.Experience ?? ""))
+                        </div>
+                        <div class="card-actions text-sm">
+                            <span class="font-bold">@experience.Author?.UserName</span>
+                            dal dýško
+                            <span class="font-bold">@experience.Percent%</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Place? Place { get; set; }
+    private bool Loading { get; set; } = true;
+    private string? AiSummary { get; set; } = null;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Place = await Places.LoadPlace(Id);
+
+        Loading = false;
+        if (Place is null)
+            Navigation.NavigateTo("/Error");
+        else
+        {
+            AiSummary = await Places.GetAiSumamry(Place);
+        }
+
+        StateHasChanged();
+    }
+
+}

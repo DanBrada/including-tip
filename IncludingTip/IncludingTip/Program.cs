@@ -29,6 +29,7 @@ builder.Services.AddSingleton<CachingService>();
 builder.Services.AddSingleton<GenAIService>();
 builder.Services.AddSingleton<NominatimService>();
 builder.Services.AddSingleton<CountriesService>();
+builder.Services.AddSingleton<PlaceService>();
 builder.Services.AddSingleton<UserService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

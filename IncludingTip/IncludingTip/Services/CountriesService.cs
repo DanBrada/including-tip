@@ -1,6 +1,7 @@
 ﻿using Bia.Countries.Iso3166;
 using IncludingTip.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Scaffolding;
 using DbCountry = IncludingTip.Model.Country;
 using IsoCountry = Bia.Countries.Iso3166.Country;
 using CzCountry = ISO3166CZ.Country;
@@ -113,5 +114,29 @@ public class CountriesService(
         cache.Put($"countries:{country.IsoCountryCode}:stats", res);
 
         return res;
+    }
+
+    public async Task<DbCountry?> CreateNewCountry(string code, string? tippingPolicy = null)
+    {
+        var norm = NormalizeCountryCode(code);
+
+        var IsoCountry = Countries.GetCountryByAlpha2(norm);
+
+        var country = new DbCountry()
+        {
+            IsoCountryCode = norm,
+            Name = IsoCountry.ActiveDirectoryName,
+            TipPolicy = tippingPolicy,
+            updatedAt = DateTime.UtcNow
+        };
+
+        var db = await DatabaseFactory.CreateDbContextAsync();
+
+        await db.Countries.AddAsync(country);
+        await db.SaveChangesAsync();
+
+        cache.Invalidate($"countries:{norm}");
+        
+        return await db.Countries.FindAsync(norm);
     }
 }

@@ -1,5 +1,4 @@
 ﻿@page "/country/{code}"
-@using System.Security.Principal
 @using IncludingTip.Services
 @using Markdig
 @inject CountriesService CountryService
@@ -12,9 +11,17 @@
         @Country.IsoCountry.ShortName
     }
 </PageTitle>
+
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/country">Země</a></li>
+    </ul>
+</div>
+
+
 @if (Country is not null)
 {
-    <h1 class="font-bold text-center text-4xl p-2">@Country?.IsoCountry.ShortName (🇨🇿: @CountryService.GetCzechCountry(Country.IsoCountry).Name)</h1>
+    <h1 class="font-bold text-center text-4xl p-2">@Country?.IsoCountry.ShortName (🇨🇿: @CountryService.GetCzechCountry(Country?.IsoCountry).Name)</h1>
 }
 
 <div>
@@ -22,7 +29,8 @@
     {
         <div class="alert alert-info my-3">
             <i class="ti ti-info-circle text-lg"></i>
-            <span>O spropitném v této zemi zatím nemáme žádné informace. <NavLink href="/" class="link">Přidat</NavLink></span>
+            <span>O spropitném v této zemi zatím nemáme žádné informace. <a href="/country/@Code/contribute"
+                                                                            class="link">Přidat</a></span>
         </div>
     }
 
@@ -82,18 +90,13 @@
                     else if (AISummary is not null)
                     {
                         @((MarkupString)Markdown.ToHtml(AISummary))
-                        <span class="italic !text-center text-xs w-full">
-                            <i class="ti ti-sparkles text-xs"></i>
-                            &nbsp;Toto shrnutí bylo vytvořeno s použitím generativní AI.
-                        </span>
+                        <AiDisclaimer/>
                     }
                 </div>
             </div>
             <div>
                 <CountryOnAMap DisplayName="@Country.IsoCountry.ShortName" Latitude="@CountryLat"
                                Longitude="@CountryLon"/>
-                Mapka, kde se země nachází + List podniků v zemi
-                @CountryLat, @CountryLon
             </div>
         </div>
     }
@@ -142,7 +145,7 @@
         loading = false;
     }
 
-    private async Task LoadCountryAISummary()
+    private async Task LoadCountryAiSummary()
     {
         if (Country?.DbCountry is null) return;
         loading = true;
@@ -159,7 +162,7 @@
         {
             try
             {
-                await LoadCountryAISummary();
+                await LoadCountryAiSummary();
             }
             catch (Exception e)
             {
