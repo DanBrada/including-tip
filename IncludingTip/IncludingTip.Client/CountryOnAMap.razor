@@ -1,35 +1,33 @@
-﻿<SfMaps>
-    <MapsLayers>
-        <MapsAnnotation X="100%" Y="100%">
-            <ContentTemplate>
-                <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
-            </ContentTemplate>
-        </MapsAnnotation>
-        <MapsLayer UrlTemplate="https://tile.openstreetmap.org/level/tileX/tileY.png" TValue="string">
-            <MapsMarkerSettings>
-                <MapsMarker Visible="true" TValue="MarkerData" DataSource="Markers"></MapsMarker>
-            </MapsMarkerSettings>
-        </MapsLayer>
-    </MapsLayers>
-</SfMaps>
+﻿@using BlazorLeafletInterop.Components
+@using BlazorLeafletInterop.Components.Layers.Raster
+@using BlazorLeafletInterop.Models.Basics
+@using BlazorLeafletInterop.Models.Options.Map
+@rendermode InteractiveAuto
+
+<Map MapOptions="@Options">
+    <TileLayer UrlTemplate="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" TileLayerOptions="new BetterTileLayerOptions()" />
+</Map>
 
 @code {
-    [Parameter]
-    public double Latitude { get; set; }
-    [Parameter]
-    public double Longitude { get; set; }
-    [Parameter]
-    public string DisplayName { get; set; }
+    [Parameter] public double Latitude { get; set; }
+    [Parameter] public double Longitude { get; set; }
+    [Parameter] public required string DisplayName { get; set; }
 
+    private MapOptions Options = new()
+    {
+        Center = new LatLng(),
+        Zoom = 6,
+        ScrollWheelZoom = "false",
+        Dragging = false,
+        ZoomControl = false,
+        PreferCanvas = true,
+        AttributionControl = true,
+    };
 
-    record MarkerData(double Latitude, double Longitude, string Name);
-
-    List<MarkerData> Markers = new();
 
     protected override void OnInitialized()
     {
-        Markers.Add(new(Latitude, Longitude, DisplayName));
+        Options.Center = new(Latitude, Longitude);
     }
-
 
 }

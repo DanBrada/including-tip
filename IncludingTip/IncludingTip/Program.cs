@@ -1,3 +1,4 @@
+using BlazorLeafletInterop.Services;
 using IncludingTip.Components;
 using IncludingTip.Model;
 using IncludingTip.Services;
@@ -19,6 +20,7 @@ builder.Services.AddDbContextFactory<TipApplicationContext>(options =>
 
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddMapService();
 
 
 builder.Services.AddSingleton<RedisService>();

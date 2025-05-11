@@ -8,7 +8,8 @@
         "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
         "applicationUrl": "http://localhost:5038",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "GEMINI_API_KEY": "AIzaSyAcU8sqVYPg-ud15PoD9cW9TwQzQV85s7w"
         }
       },
       "https": {
@@ -18,7 +19,8 @@
         "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
         "applicationUrl": "https://localhost:7047;http://localhost:5038",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "GEMINI_API_KEY": "AIzaSyAcU8sqVYPg-ud15PoD9cW9TwQzQV85s7w"
         }
       }
     }

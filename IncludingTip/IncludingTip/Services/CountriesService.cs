@@ -15,6 +15,8 @@ public class CountriesService(
 {
     public record CountryContext(IsoCountry IsoCountry, DbCountry? DbCountry);
 
+    public record CountryStats(double AvgTip, int Reviews, int Places);
+
     public static string NormalizeCountryCode(string code)
     {
         if (code.Length != 2)
@@ -74,5 +76,42 @@ public class CountriesService(
         }
 
         return czc;
+    }
+
+    public async Task SaveCountry(DbCountry country)
+    {
+        var db = await DatabaseFactory.CreateDbContextAsync();
+
+        // I do this because i might have pulled the country from cache, so it's not the tracked entity
+        var ctry = await db.Countries.FindAsync(country.IsoCountryCode);
+
+        if (ctry is null)
+            return;
+
+        ctry.TipPolicy = country.TipPolicy;
+        ctry.updatedAt = DateTime.UtcNow;
+        // and ofc invalidate cache entry
+        cache.Invalidate($"countries:{NormalizeCountryCode(country.IsoCountryCode)}");
+
+        await db.SaveChangesAsync();
+    }
+
+    public CountryStats GetCountryStats(DbCountry country)
+    {
+        var cacheKey = cache.Get<CountryStats>($"countries:{country.IsoCountryCode}:stats");
+
+        if (cacheKey is not null)
+            return cacheKey;
+        
+        var averageTip = country.GetAverageTip();
+        var ratings = country.Places.Sum(p => p.Tips.Count);
+        var places = country.Places.Count;
+
+
+        var res =  new CountryStats(averageTip, ratings, places);
+        
+        cache.Put($"countries:{country.IsoCountryCode}:stats", res);
+
+        return res;
     }
 }

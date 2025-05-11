@@ -4,6 +4,8 @@
     themes: light --default;
 }
 
+@source "../../IncludingTip.Client/*.razor";
+
 @theme {
     --font-display: "Open Sans", "Noto Color Emoji",sans-serif;
     --font-sans: var(--font-display);
@@ -12,4 +14,9 @@
 
 .prose p {
     @apply mb-0!;
+}
+
+.leaflet-container {
+    height: 300px !important;
+    width: 100% !important;
 }

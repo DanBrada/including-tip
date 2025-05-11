@@ -1,0 +1,63 @@
+﻿@page "/country/{code}/contribute"
+@using IncludingTip.Model
+@using IncludingTip.Services
+@inject NavigationManager Navigation
+@inject CountriesService CountriesService
+@rendermode InteractiveServer
+<h1 class="font-bold text-center text-4xl p-2">Úprava informací o zemi</h1>
+<PageTitle>Úprava země</PageTitle>
+
+@if (Loading)
+{
+    <Loader/>
+}
+else
+{
+    <div class="flex flex-col justify-center">
+        <MarkdownEditor @bind-Value="@mdVal" SpellChecker="false"/>
+        <button class="btn btn-primary" @onclick="SaveDescription">Uložit</button>
+    </div>
+}
+
+@code {
+    [Parameter] public string Code { get; set; }
+    string mdVal = "";
+    bool Loading { get; set; } = false;
+    Country? country = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loading = true;
+        var country = await CountriesService.QueryCountry(Code);
+
+        if (country is null)
+        {
+            Navigation.NavigateTo("/country");
+            return;
+        }
+
+        if (country.DbCountry?.TipPolicy is not null)
+        {
+            mdVal = country.DbCountry.TipPolicy;
+        }
+
+        if (country.DbCountry is not null)
+            this.country = country.DbCountry;
+
+        Loading = false;
+        StateHasChanged();
+    }
+
+
+    async Task SaveDescription()
+    {
+        if (country is null)
+            return;
+        
+        country.TipPolicy = mdVal;
+        
+        await CountriesService.SaveCountry(country);
+        Navigation.NavigateTo($"/country/{Code}");
+    }
+
+}

@@ -26,7 +26,7 @@
         </div>
     }
 
-    @foreach(var Error in Errors)
+    @foreach (var Error in Errors)
     {
         <div class="alert alert-error my-3">
             <i class="ti ti-alert-octagon text-lg"></i>
@@ -36,46 +36,62 @@
 
     @if (Country?.DbCountry is null && loading)
     {
-        <div class="w-full flex jusify-center">
-            <span class="mx-auto loading loading-spinner loading-xl"></span>
-        </div>
+        <Loader/>
     }
 
     @if (Country?.DbCountry is not null)
     {
         <div class="grid grid-cols-3 gap-3">
-            <div class="col-span-3 stats-shadow">
-                <div class="stat">
-                    <div class="stat-title">Průměrné spropitné</div>
-                    <div class="stat-value">@Country.DbCountry.GetAverageTip()%</div>
-                    <div class="stat-desc">Průměr průměrů</div>
+            @if (Stats is not null)
+            {
+                <div class="col-span-3 stats stats-shadow py-2">
+                    <div class="stat">
+                        <div class="stat-title">Průměrné spropitné</div>
+                        <div class="stat-value">@Stats.AvgTip%</div>
+                        <div class="stat-desc">Průměr průměrů</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-title">Počet podniků</div>
+                        <div class="stat-value">@Stats.Places</div>
+                        <div class="stat-actions">
+                            <a href="/country/@Code/places" class="link">Seznam</a>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-title">Celkem hodnocení</div>
+                        <div class="stat-value">@Stats.Reviews</div>
+                    </div>
                 </div>
-            </div>
+            }
             <div class=" col-span-2 text-justify mx-auto">
                 <h2 class="font-bold text-center text-3xl py-3">Spropitné v zemi</h2>
                 <div class="prose max-w-[75ch] text-justify">
-                    @Country.DbCountry.TipPolicy
+                    @((MarkupString)Markdown.ToHtml(Country.DbCountry.TipPolicy ?? "Informace nenalezeny."))
+                </div>
+                <div class="w-full">
+                    <a href="/country/@Code/contribute" class="link text-grey ml-auto">
+                        <i class="ti ti-pencil"></i>&nbsp;Upravit
+                    </a>
                 </div>
                 <h2 class="font-bold text-center text-3xl py-3">Shrnutí zkušeností</h2>
                 <div class="prose max-w-[75ch] text-justify mb-0">
                     @if (loading)
                     {
-                        <div class="w-full">
-                            <span class="mx-auto loading loading-spinner loading-xl"></span>
-                        </div>
+                        <Loader/>
                     }
-                    else if(AISummary is not null)
+                    else if (AISummary is not null)
                     {
                         @((MarkupString)Markdown.ToHtml(AISummary))
                         <span class="italic !text-center text-xs w-full">
                             <i class="ti ti-sparkles text-xs"></i>
-                            &nbsp;Toto shrnutí bylo vytvořeno s použitím generativní umělé inteligence.
+                            &nbsp;Toto shrnutí bylo vytvořeno s použitím generativní AI.
                         </span>
                     }
                 </div>
             </div>
             <div>
-                @* <CountryOnAMap DisplayName="@Country.IsoCountry.ShortName" Latitude="@CountryLat" Longitude="@CountryLon" /> *@
+                <CountryOnAMap DisplayName="@Country.IsoCountry.ShortName" Latitude="@CountryLat"
+                               Longitude="@CountryLon"/>
                 Mapka, kde se země nachází + List podniků v zemi
                 @CountryLat, @CountryLon
             </div>
@@ -92,6 +108,7 @@
     private string? AISummary = null;
 
     private CountriesService.CountryContext? Country;
+    private CountriesService.CountryStats? Stats;
 
 
     private async Task LoadCountryAsync()
@@ -104,7 +121,7 @@
             return;
         }
 
-        if(Country.DbCountry is not null)
+        if (Country.DbCountry is not null)
         {
             try
             {
@@ -112,6 +129,9 @@
 
                 CountryLat = lat;
                 CountryLon = lon;
+
+
+                Stats = CountryService.GetCountryStats(Country.DbCountry);
             }
             catch (Exception e)
             {
@@ -136,16 +156,18 @@
         await LoadCountryAsync();
         StateHasChanged();
         if (Country is not null)
+        {
             try
             {
                 await LoadCountryAISummary();
             }
             catch (Exception e)
             {
-                Errors.Add(e.Message);
+                Errors.Add($"Chyba při získávání AI souhrnu: {e.Message}");
                 AISummary = "Vyskytla se chyba :(";
                 loading = false;
             }
+        }
     }
 
 }
